@@ -10,6 +10,8 @@
   <depend>crazyflie_py</depend>
   <depend>python3-rowan-pip</depend>
   <depend>crazyflie_sim</depend>
+
+  <exec_depend>ros2launch</exec_depend>
   
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

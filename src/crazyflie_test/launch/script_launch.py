@@ -33,30 +33,20 @@ def generate_launch_description():
             }.items()
     )
 
-    # example_node = None
-    # print(script.perform())
-    # if PythonExpression(["'",script,"' != ''"]):
-    #     print('here1')
-    #     example_node = Node(
-    #         package='crazyflie_test',
-    #         executable=script,
-    #         name=script,
-    #         parameters=[{
-    #             'use_sim_time': PythonExpression(["'", backend, "' == 'sim'"]),
-    #         }, {'hover_height': 0.3},
-    #                         {'incoming_twist_topic': '/cmd_vel'},
-    #                         {'robot_prefix': '/cf231'}]
-    #     )
+    example_node = Node(
+        package='crazyflie_test',
+        executable=script,
+        name=script,
+        parameters=[{
+            'use_sim_time': PythonExpression(["'", backend, "' == 'sim'"]),
+        }, {'hover_height': 0.3},
+                        {'incoming_twist_topic': '/cmd_vel'},
+                        {'robot_prefix': '/cf231'}]
+    )
 
-    #     return LaunchDescription([
-    #         script_launch_arg,
-    #         backend_launch_arg,
-    #         crazyflie,
-    #         example_node 
-    #     ])
-    
     return LaunchDescription([
         script_launch_arg,
         backend_launch_arg,
         crazyflie,
+        example_node 
     ])

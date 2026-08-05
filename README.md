@@ -1,5 +1,6 @@
 ## Setup
 
+### Setup Crazyswarm2
 Mostly just follow Crazyswarm2 tutorial: https://imrclab.github.io/crazyswarm2/installation.html
 
 Notes:
@@ -11,25 +12,33 @@ Notes:
 * Install Cython
 * Intellisense in VS Code: https://share.google/aimode/F97tgVNr9qz0fYPDh 
 
-Crazyradio 2.0 tutorial: https://www.bitcraze.io/documentation/tutorials/getting-started-with-crazyradio-2-0/ 
+### Setup Crazyradio 2.0
+follow the tutorial: https://www.bitcraze.io/documentation/tutorials/getting-started-with-crazyradio-2-0/ 
 
+
+### Learn Crazyswarm2
 Introduction tutorials: https://imrclab.github.io/crazyswarm2/tutorials.html# 
 * Includes teleoperation
 * Visualisation with rviz
 * Simple Mapping with SLAM toolbox
 
-
-## Development Commands
-
-Setup workspace:
+### Setup development workspace
+Automatically setup new terminal windows by adding these two lines at the end of `~/.bashrc` file. These commands make ros2 and the firmware package available.
 
 ```bash
 source /opt/ros/jazzy/setup.bash
-# after build, do: source ./install/setup.bash
+# place the crazyflie-firmware repository in user root folder ~/
 export PYTHONPATH=~/crazyflie-firmware/build:$PYTHONPATH
-# python3 -m venv venv # if you haven't before
-source venv/bin/activate
 ```
+
+Create and activate a virtual environment for workspace python code:
+
+```bash
+python3 -m venv venv # one-time - if you haven't before
+source venv/bin/activate # for every terminal session
+```
+
+## Development Commands
 
 Build ROS2 packages with intellisense & references
 
@@ -45,6 +54,15 @@ OR without rebuild, try:
 ```bash
 python src/<packagename>/<packagename>/<scriptname>.py
 ```
+
+Run Crazyswarm2 app
+```bash
+ros2 launch <package_name> launch.py script:=<script_name> backend:=sim
+```
+
+## Debugging & Analysis Tools
+
+rqt - GUI for inspecting and managing ros2
 
 ## Research
 

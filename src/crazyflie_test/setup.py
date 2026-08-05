@@ -28,7 +28,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'hello_world = crazyflie_test.hello_world:main'
+            'hello_world = crazyflie_test.hello_world:main',
+            'teleop = crazyflie_test.teleop:main',
+            'figure8 = crazyflie_test.figure8:main',
         ],
     },
 )
