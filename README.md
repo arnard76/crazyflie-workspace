@@ -45,7 +45,7 @@ python3 -m venv venv --system-site-packages
 source venv/bin/activate # for every terminal session
 ```
 
-## Development Commands
+## General ROS2 Commands
 
 Build ROS2 packages with intellisense & references
 
@@ -56,34 +56,42 @@ colcon build --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -
 Run ROS2 package
 ```bash
 ros2 run <packagename> <scriptname>
+ros2 run tf2_ros static_transform_publisher --x 1.0 --y 2.0 --z 0.0 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id my_new_frame
 ```
+
 OR without rebuild, try:
 ```bash
 python src/<packagename>/<packagename>/<scriptname>.py
 ```
 
-Run Crazyswarm2 app
+Launch multiple nodes together:
 ```bash
-ros2 launch <package_name> launch.py script:=<script_name> backend:=sim
-```
-
-Run bridge to websockets:
-```bash
-# deactivate the venv for this
+ros2 launch <packagename> <launchfilename>
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+
+# Crazyswarm args
+ros2 launch <package_name> launch.py script:=<script_name> backend:=sim 
 ```
 
-Create new frame:
-```bash
-ros2 run tf2_ros static_transform_publisher --x 1.0 --y 2.0 --z 0.0 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id my_new_frame
-```
-
-## Debugging & Analysis Tools
+## Debugging & Analysis
 
 rqt - GUI for inspecting and managing ros2
 
+rosbag 2
+
 [foxglove](https://foxglove.dev/home)
     * ```ros2 launch foxglove_bridge foxglove_bridge_launch.xml```
+
+## Run Smart Crazyflie App
+
+```bash
+ros2 launch smart_crazyflie launch.py backend:=sim script:=main
+ros2 launch smart_crazyflie launch.py script:=main
+```
+
+It includes: Crazyflie Launch, Crazyswarm2 App, ROSbridge, Foxglove, Static & Moving Frames 
+
 
 ## Research
 
