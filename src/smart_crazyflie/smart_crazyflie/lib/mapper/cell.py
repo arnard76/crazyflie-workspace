@@ -23,6 +23,7 @@ class Cell:
     seen = False
     override: CellState | None = None
     me = False
+    states:set[CellState] = []
 
     def clamp(self, n, minn, maxn):
         return max(min(maxn, n), minn)

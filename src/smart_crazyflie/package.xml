@@ -7,9 +7,12 @@
   <maintainer email="arnav@todo.todo">arnav</maintainer>
   <license>MIT</license>
 
-   <depend>python3-fastapi</depend> 
-   <depend>python3-opencv</depend>
-   <depend>python3-matplotlib</depend>
+  <depend>python3-fastapi</depend> 
+  <depend>python3-opencv</depend>
+  <depend>python3-matplotlib</depend>
+  <depend>crazyflie_py</depend>
+  <depend>python3-rowan-pip</depend>
+  <depend>crazyflie_sim</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

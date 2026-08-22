@@ -1,5 +1,6 @@
 """
-Complete COMPSYS 732 - Mobile Autonomous Robotics - Mission: Red Box Finder & Arena Mapper
+MSc in Computer Science Thesis
+Crazyflie 2.1+ Drone Software Modules
 """
 
 import rclpy
@@ -10,14 +11,20 @@ from smart_crazyflie.lib.obstacle_avoider import ObstacleAvoider
 from smart_crazyflie.lib.auto_roamer import AutonomousRoamer
 from smart_crazyflie.lib.mapper import MapperAndLocaliser
 from smart_crazyflie.lib.red_detector import RedFinder
+from smart_crazyflie.lib.locate_markers.measure_live_locations import locate_marker
 import cv2
 from smart_crazyflie.lib.common import ROBOT_SIZE
 import numpy as np
 
+from crazyflie_py import Crazyswarm
+from crazyflie_py.crazyflie import Crazyflie
+from smart_crazyflie.lib.marker_localiser import MarkerLocaliser
+
 class SmartCrazyflie(Node):
-    def __init__(self):
+    def __init__(self, swarm):
         super().__init__("smart_crazyflie")
-        print("Goal: ????")
+        self.logger = self.get_logger()
+        self.logger.info("Goal: ????")
 
         self.global_phase_handle = PhaseManager(self)
         self.motion = MotionController(self, self.global_phase_handle)
@@ -26,7 +33,7 @@ class SmartCrazyflie(Node):
         self.mapper = MapperAndLocaliser(self, self.motion)
         self.auto_roamer = AutonomousRoamer(self, self.mapper, self.motion)
         self.auto_roamer.start_roaming()
-        self.red_finder = RedFinder(self,self.mapper, self.motion)
+        self.marker_localiser = MarkerLocaliser(self,self.mapper, self.motion)
         # self.rest_api = 
         
         self.moving_home = False
@@ -37,14 +44,25 @@ class SmartCrazyflie(Node):
 
         self.TIMEOUT = 10 * 60 - 20 # 10 minutes - 20s for safety
 
-        self.get_logger().info("Working towards goal...")
-    
+        self.logger.info("Working towards goal...")
 
+        # TAKEOFF_DURATION = 5
+        # timeHelper = swarm.timeHelper
+        # cf:Crazyflie = swarm.allcfs.crazyflies[0]
+        # cf.takeoff(targetHeight=0.45, duration=TAKEOFF_DURATION)
+        # timeHelper.sleep(3*TAKEOFF_DURATION)
+        # self.logger.info("completed takeoff")
+        # # cf.cmdPosition((1.0, 1.0, 1.0), yaw=math.pi/2)
+        # cf.notifySetpointsStop()
+        # cf.land(0.04, TAKEOFF_DURATION)
+        # timeHelper.sleep(3*TAKEOFF_DURATION)
+        # self.logger.info("completed land")
+        
     def control_loop(self):
         if self.global_phase_handle.now - self.start_time > self.TIMEOUT:
             raise Exception("Node is FINISHED! Auto timeout")
 
-        if not self.red_finder:
+        if not self.marker_localiser:
             if not self.moving_home:
                 # TODO: need to reset for correct historical repulsion
                 # but also it would be good to store the entire history
@@ -64,33 +82,39 @@ class SmartCrazyflie(Node):
 
             self.global_phase_handle.control_loop()
 
-        elif self.red_finder.red_found:
-            print('red found')
-            self.destroy_subscription(self.red_finder.img_sub)
-            self.red_finder = None
-        elif not self.red_finder.red_found and self.red_finder.red_detected:
-            print('red detected, and roaming? ', self.going_for_red)
-            if not self.going_for_red and self.mapper.goal_cell:
-                self.going_for_red = True
-                self.auto_roamer.stop_roaming()
-                goal = self.mapper.goal_cell
-                self.auto_roamer.start_moving_to_goal_red(self.mapper.cell_to_pos(goal))
+        # elif self.marker_localiser.last_packet:
+        #     self.logger.info('red found')
+        #     self.destroy_subscription(self.red_finder.img_sub)
+        #     self.red_finder = None
+        # elif not self.red_finder.last_packet and self.red_finder.red_detected:
+        #     self.logger.info('red detected, and roaming? ', self.going_for_red)
+        #     if not self.going_for_red and self.mapper.goal_cell:
+        #         self.going_for_red = True
+        #         self.auto_roamer.stop_roaming()
+        #         goal = self.mapper.goal_cell
+        #         self.auto_roamer.start_moving_to_goal_red(self.mapper.cell_to_pos(goal))
+            
+        #     self.global_phase_handle.control_loop()
+        else:
             
             self.global_phase_handle.control_loop()
-        else:
-            self.global_phase_handle.control_loop()
 
 
-def main(args=None):
-    rclpy.init(args=args)
-    node = SmartCrazyflie()
+def main():
+    swarm = Crazyswarm()
+    node = SmartCrazyflie(swarm)
     try:
         rclpy.spin(node)
     except KeyboardInterrupt as e:
-        print("Ended program")
+        node.logger.info("User Stopped Program")
+        swarm.allcfs.emergency()
+    except Exception as e:
+        node.logger.info(e)
+        node.logger.info("Error Stopped Program")
+        swarm.allcfs.emergency()
     finally:
         node.mapper.save_map()
-        node.get_logger().info(f"Red Object Found at {node.mapper.goal_cell and node.mapper.cell_to_pos(node.mapper.goal_cell)} | Robot is at {node.motion.current_pos}")
+        node.logger.info(f"Red Object Found at {node.mapper.goal_cell and node.mapper.cell_to_pos(node.mapper.goal_cell)} | Robot is at {node.motion.current_pos}")
 
         cv2.destroyAllWindows()
         node.destroy_node()

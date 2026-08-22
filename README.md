@@ -11,6 +11,7 @@ Notes:
 * usbipd-win is needed to forward USB devices connected to windows machine to WSL/linux: https://github.com/dorssel/usbipd-win/wiki/WSL-support/ 
 * Install Cython
 * Intellisense in VS Code: https://share.google/aimode/F97tgVNr9qz0fYPDh 
+* PS3 for manual controller: https://share.google/aimode/67dpqKSP3JquDCim7
 
 ### Setup Crazyradio 2.0
 follow the tutorial: https://www.bitcraze.io/documentation/tutorials/getting-started-with-crazyradio-2-0/ 
@@ -29,6 +30,10 @@ Automatically setup new terminal windows by adding these two lines at the end of
 source /opt/ros/jazzy/setup.bash
 # place the crazyflie-firmware repository in user root folder ~/
 export PYTHONPATH=~/crazyflie-firmware/build:$PYTHONPATH
+
+# install rosbridge: https://wiki.ros.org/rosbridge_suite
+# learn ros2 bridge: https://foxglove.dev/blog/using-rosbridge-with-ros2
+sudo apt-get install ros-jazzy-rosbridge-server
 ```
 
 Create and activate a virtual environment for workspace python code:
@@ -60,9 +65,23 @@ Run Crazyswarm2 app
 ros2 launch <package_name> launch.py script:=<script_name> backend:=sim
 ```
 
+Run bridge to websockets:
+```bash
+# deactivate the venv for this
+ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+```
+
+Create new frame:
+```bash
+ros2 run tf2_ros static_transform_publisher --x 1.0 --y 2.0 --z 0.0 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id my_new_frame
+```
+
 ## Debugging & Analysis Tools
 
 rqt - GUI for inspecting and managing ros2
+
+[foxglove](https://foxglove.dev/home)
+    * ```ros2 launch foxglove_bridge foxglove_bridge_launch.xml```
 
 ## Research
 

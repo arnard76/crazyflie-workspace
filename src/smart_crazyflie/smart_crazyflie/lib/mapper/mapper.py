@@ -1,3 +1,5 @@
+from typing import Literal
+
 from sensor_msgs.msg import LaserScan
 from smart_crazyflie.lib.common import NAMESPACE, FRONT_HEADING, ROBOT_SIZE
 import math
@@ -12,17 +14,15 @@ from smart_crazyflie.lib.mapper.cell import Cell, CellState
 class MapperAndLocaliser:
     GRID_CELL_SQUARE_SIZE = 0.1  # m
     GRID_SIZE = [10.0, 10.0, 10.0]  # m
-    ROBOT_START = Position(GRID_SIZE[0] / 2, GRID_SIZE[1] / 2,GRID_SIZE[2] / 2 )
+    ROBOT_START = Position(GRID_SIZE[0] / 2, GRID_SIZE[1] / 2, GRID_SIZE[2] / 2)
 
     map_as_matrix: list[list[Cell]]
 
     def __init__(self, node: Node, motion: MotionController):
-        print(
-            f"Mapping \
+        print(f"Mapping \
            { self.GRID_SIZE[0] / self.GRID_CELL_SQUARE_SIZE}x \
             {self.GRID_SIZE[1] / self.GRID_CELL_SQUARE_SIZE}x \
-            {self.GRID_SIZE[2] / self.GRID_CELL_SQUARE_SIZE}"
-        )
+            {self.GRID_SIZE[2] / self.GRID_CELL_SQUARE_SIZE}")
 
         # mapper depends on....
         self.node = node
@@ -38,7 +38,7 @@ class MapperAndLocaliser:
 
         self.GRID_SIZE_CELLS = [self.dist_to_i(x) for x in self.GRID_SIZE]
 
-        # TODO: turn into a history mechanism 
+        # TODO: turn into a history mechanism
         # that shows how a certain type of cell is changing over time
         self.travelled_path = []
 
@@ -47,15 +47,17 @@ class MapperAndLocaliser:
 
         # start mapping...
         self.map_as_matrix = self.initialise_map()
-        self.node.create_timer(0.1, lambda: self.displayer.draw_grid(self.map_as_matrix))
-    
+        self.node.create_timer(
+            0.1, lambda: self.displayer.draw_grid(self.map_as_matrix)
+        )
+
     @property
     def me_cell(self):
         pos = self.motion.current_pos
 
         if not pos.is_valid():
             return
-        
+
         return self.cell_from_pos(pos)
 
     @property
@@ -120,7 +122,7 @@ class MapperAndLocaliser:
                     cell.me = True
                 elif cells_away_from_me_cell < self.robot_radius_cells:
                     cell.override = CellState.ME
-                elif cell.me: 
+                elif cell.me:
                     cell.me = False
                     cell.override = CellState.ME_HISTORY
                     self.travelled_path.append([row_i, col_i])
@@ -146,19 +148,41 @@ class MapperAndLocaliser:
     def cell_to_pos(self, cell):
         return [self.i_to_dist(cell[0]), self.i_to_dist(cell[1])]
 
+    def update(
+        self,
+        cell_state: CellState,
+        new_cells: list[Cell],
+        update_type: Literal["add", "replace"] = "add",
+        previous_cells: list[Cell] | None = None,
+    ):
+        if update_type == "replace":
+            if previous_cells:
+                # just replace these cells
+                pass
+            else:
+                for row_i, row in enumerate(self.map_as_matrix):
+                    for col_i, cell in enumerate(row):
+                        if cell_state in cell.states:
+                            cell.states.remove(cell_state)
+
+        for new_cell in new_cells:
+            new_cell.states.add(cell_state)
+
     def update_map(self, lidar_range, in_direction):
         # get cells in range in direction
         if lidar_range == float("inf"):
             return
-        
+
         me_pos = self.motion.current_pos
         if not me_pos:
             return
 
-        cells = self.cells_hit_by_range_beam(me_pos, in_direction + self.motion.current_rot.yaw, lidar_range)
+        cells = self.cells_hit_by_range_beam(
+            me_pos, in_direction + self.motion.current_rot.yaw, lidar_range
+        )
         if len(cells) < 2:
             return
-        
+
         try:
             for index, cell_pos in enumerate(cells):
                 cell: Cell = self.map_as_matrix[cell_pos[0]][cell_pos[1]]
@@ -191,8 +215,13 @@ class MapperAndLocaliser:
         #         print("no real index", cell_pos, lidar_range)
         #         # raise Exception(e)
 
-    def cells_hit_by_range_beam(self, beam_start_location: Position, beam_direction_degrees: float, beam_length: float) ->  list[tuple[int, int]]:
-        x0, y0, z0  = beam_start_location.list
+    def cells_hit_by_range_beam(
+        self,
+        beam_start_location: Position,
+        beam_direction_degrees: float,
+        beam_length: float,
+    ) -> list[tuple[int, int]]:
+        x0, y0, z0 = beam_start_location.list
         cell_size = self.GRID_CELL_SQUARE_SIZE
 
         # Normalize direction
