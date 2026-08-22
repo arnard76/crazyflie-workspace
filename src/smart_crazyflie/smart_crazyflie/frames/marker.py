@@ -18,7 +18,7 @@ from rclpy.node import Node
 
 from tf2_ros import TransformBroadcaster
 
-from turtlesim.msg import Pose
+from geometry_msgs.msg import PoseStamped
 
 
 class MarkerFrame(Node):
@@ -38,7 +38,7 @@ class MarkerFrame(Node):
         # Subscribe to a turtle{1}{2}/pose topic and call handle_turtle_pose
         # callback function on each message
         self.subscription = self.create_subscription(
-            Pose, f"/aruco", self.handle_marker_pose, 1
+            PoseStamped, f"aruco", self.handle_marker_pose, 1
         )
         self.subscription  # prevent unused variable warning
 
@@ -49,7 +49,7 @@ class MarkerFrame(Node):
         # corresponding tf variables
         t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = "UGV-camera"
-        t.child_frame_id = self.turtlename
+        t.child_frame_id = "marker"
 
         # Turtle only exists in 2D, thus we get x and y translation
         # coordinates from the message and set the z coordinate to 0
