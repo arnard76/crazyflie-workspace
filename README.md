@@ -39,7 +39,9 @@ sudo apt-get install ros-jazzy-rosbridge-server
 Create and activate a virtual environment for workspace python code:
 
 ```bash
-python3 -m venv venv # one-time - if you haven't before
+# one-time - if you haven't before,
+# ROS2 packages are installed globally hence arg
+python3 -m venv venv --system-site-packages 
 source venv/bin/activate # for every terminal session
 ```
 
