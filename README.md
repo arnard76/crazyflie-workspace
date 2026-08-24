@@ -98,3 +98,51 @@ It includes: Crazyflie Launch, Crazyswarm2 App, ROSbridge, Foxglove, Static & Mo
 Related Research Documentation: https://docs.google.com/document/d/1LjIgr2-3v0vMCZJ1xNWqVj5WK5T3llzlzFar9guhgWY/edit?tab=t.pxht6snb1054 
 
 
+
+
+### Roadmap / Goals
+
+E2E Autonomous mapping UGV multi-UAV team
+
+E2E:
+    1. UAV charging on Dock mounted on UGV
+    2. UAV turns on
+    3. UAV takes off
+    4. UAV starts mapping area
+    5. When tired or complete, UAV returns to UGV (possibly in different location)
+    6. UGV & UAV communicate for precise landing on dock via Aruco Marker Tracking
+    7. UAV docks
+    8. UAV starts charging
+    9. next UAV starts its cycle
+    10. repeat
+
+
+Autonomous:
+    - UAV is charged on UGV
+    - UAV is controlled via program running on UGV computer
+    - UAV communicates via Crazyradio 2.0 connected to UGV computer
+
+Mapping:
+    - efficient path planning -  try virtual forces with all 3 entities (UGV, UAV, UAV)
+
+#### Precise Landing
+
+Frames:
+
+![alt text](<frames-for-docking.jpeg>)
+
+
+Steps:
+
+- UAV go above dock via onboard localization
+- set status to docking mode 
+- status change should turn on UGV tracking camera
+- use aruco tracking to verify
+- IF offset from dock centre > 5cm
+    - program creates new phase to adjust UAV motion
+    - repeat condition
+- ELSE: land UAV
+
+Improvements:
+
+- Smoothen/remove anomalies for aruco tracking - try Ekman kalman filter (EKF)?
