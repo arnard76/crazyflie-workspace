@@ -4,3 +4,4 @@ venv
 install
 log*
 locate_markers
+/*log*/

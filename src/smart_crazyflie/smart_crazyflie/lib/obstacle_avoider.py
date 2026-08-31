@@ -10,6 +10,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from smart_crazyflie.lib.common import NAMESPACE, FRONT_HEADING, ROBOT_SIZE
 from smart_crazyflie.lib.motion_controller import MotionController
+from smart_crazyflie.lib.phase_handler import Phase
 
 ### OBSTACLE AVOIDANCE ###
 ROBOT_AVOID_DISTANCE = 0.12  # metres - threshold to do AVOID action
@@ -61,12 +62,12 @@ class ObstacleAvoider:
         phase = self.phase_handle.current_phase
         if (
             phase
-            and "OA" not in phase["name"]
-            and "rotate" not in phase["name"].lower()
+            and "OA" not in phase.name
+            and "rotate" not in phase.name.lower()
             and self.nearest_front < AVOID_DISTANCE
         ):
             self.phase_handle.add_phase(
-                {"name": "OA: Stop to avoid crash", "actions": lambda: None}
+               Phase("OA: Stop to avoid crash",  lambda: None)
             )
             self.phase_handle.start_next_phase()
             phase = self.phase_handle.current_phase

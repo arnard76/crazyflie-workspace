@@ -1,3 +1,4 @@
+import math
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -12,7 +13,7 @@ from launch_ros.actions import Node
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 
 
-def static_frame(parent_frame: str, child_frame: str):
+def static_frame(parent_frame: str, child_frame: str, xyz: list[float] = [0.0, 0.0, 0.0], ypr: list[float]=[0.0, 0.0, 0.0]):
     return LaunchDescription(
         [
             Node(
@@ -20,17 +21,17 @@ def static_frame(parent_frame: str, child_frame: str):
                 executable="static_transform_publisher",
                 arguments=[
                     "--x",
-                    "0",
+                    str(xyz[0]),
                     "--y",
-                    "0",
+                    str(xyz[1]),
                     "--z",
-                    "0",
+                    str(xyz[2]),
                     "--yaw",
-                    "0",
+                    str(ypr[0]),
                     "--pitch",
-                    "0",
+                    str(ypr[1]),
                     "--roll",
-                    "0",
+                    str(ypr[2]),
                     "--frame-id",
                     parent_frame,
                     "--child-frame-id",
@@ -94,13 +95,13 @@ def generate_launch_description():
     )
 
     # frames
-    static_frames = [static_frame("marker", "UAV"), static_frame("UGV", "UGV-camera")]
+    static_frames = [static_frame("marker", "UAV"), static_frame("UGV", "UGV-camera", ypr=[0, math.pi/2, 0])]
     marker_frame = Node(
         package="smart_crazyflie",
         executable="marker_frame",
         name="marker_frame",
     )
-    UGV_frame = static_frame("UGV", "world")  # just for now
+    UGV_frame = static_frame("world", "UGV")  # just for now
     moving_frames = [marker_frame, UGV_frame]
 
     return LaunchDescription(

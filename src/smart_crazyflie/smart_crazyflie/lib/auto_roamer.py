@@ -17,6 +17,7 @@ import math
 import numpy as np
 from smart_crazyflie.lib.path_plan.force_field_path_planner import ForceFieldPathPlanner
 from smart_crazyflie.lib.common import ROBOT_SIZE
+from smart_crazyflie.lib.phase_handler import Phase
 
 
 direction = 1
@@ -33,7 +34,7 @@ class AutonomousRoamer:
 
         self.node = node
         self.current_goal = 0
-        # self.motion.phase_handle.add_phase({"name": "roam towards unknown areas", "actions": self.path_towards_unknown_area})
+        # self.motion.phase_handle.add_phase(Phase("roam towards unknown areas", self.path_towards_unknown_area))
         self.planner = ForceFieldPathPlanner(self.mapper)
 
         self.goals = [
@@ -81,22 +82,22 @@ class AutonomousRoamer:
 
         print("rotating", np.round(bearing, 1))
         phases = [
-            {
-                "name": "Rotate towards force",
-                "actions": lambda: self.motion.rotate_for(bearing),
-            },
-            {
-                "name": "force move",
-                "actions": lambda: self.motion.drive_for(
+            Phase(
+                "Rotate towards force",
+                lambda: self.motion.rotate_for(bearing),
+            ),
+             Phase(
+                "force move",
+                lambda: self.motion.drive_for(
                     self.motion.DEFAULT_FORWARD_SPEED * self.REPLAN_ROUTE_INTERVAl,
                     self.motion.DEFAULT_FORWARD_SPEED,
                 ),
-            },
+             ),
         ]
 
         if not self.disabled:
             self.motion.phase_handle.add_phases(phases)
-            self.motion.phase_handle.skip_to_phase(phases[0]["name"])
+            self.motion.phase_handle.skip_to_phase(phases[0].name)
 
     def plan_path_to(self, location: tuple[float]):
         current_pos = self.motion.current_pos
@@ -116,7 +117,7 @@ class AutonomousRoamer:
 
         if not self.disabled:
             self.motion.phase_handle.add_phases(updated_plan)
-            self.motion.phase_handle.skip_to_phase(updated_plan[0]["name"])
+            self.motion.phase_handle.skip_to_phase(updated_plan[0].name)
 
     def path_towards_unknown_area(self):
         # unknown area is the gray
