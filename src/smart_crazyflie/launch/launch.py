@@ -59,6 +59,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             "backend": backend,
+            "debug": "False"
         }.items(),
     )
 
